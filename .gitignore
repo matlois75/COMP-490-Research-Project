@@ -3,4 +3,3 @@
 data
 wandb
 checkpoints
-Vanilla_Backpropagation/bp_network.py

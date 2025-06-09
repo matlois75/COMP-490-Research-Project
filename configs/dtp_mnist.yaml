@@ -4,13 +4,12 @@ hidden_dims: [240, 240, 240, 240, 240, 240, 240]
 output_dim: 10
 
 batch_size: 128
-epochs: 100
+epochs: 50
 forward_lr: 1e-3
 inverse_lr: 2e-3
 eta_hat: 0.5
 sigma: 0.05
-final_sigma: 0.01
-num_workers: 2
+num_workers: 0
 
 data_dir: data
 out_dir: checkpoints
