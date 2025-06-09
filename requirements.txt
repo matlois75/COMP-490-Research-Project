@@ -1,0 +1,7 @@
+torch >= 2.3 --index-url https://download.pytorch.org/whl/cu128 # change cu128 to your CUDA version, or omit it if using CPU-only version
+torchvision --index-url https://download.pytorch.org/whl/cu128
+numpy
+tqdm
+# pytest/
+wandb
+PyYAML>=6

@@ -1,0 +1,23 @@
+# Difference Target Propagation
+input_dim: 784
+hidden_dims: [240, 240, 240, 240, 240, 240, 240]
+output_dim: 10
+
+batch_size: 128
+epochs: 100
+forward_lr: 1e-3
+inverse_lr: 2e-3
+eta_hat: 0.5
+sigma: 0.05
+final_sigma: 0.01
+num_workers: 2
+
+data_dir: data
+out_dir: checkpoints
+ckpt_dir: runs
+
+log_interval: 100
+checkpoint_interval: 10
+
+# Vanilla Backpropagation
+bp_lr: 1e-3
