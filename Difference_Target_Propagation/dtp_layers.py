@@ -3,13 +3,13 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class ForwardLayer(nn.Module):
-    def __init__(self, in_dim, out_dim):
+    def __init__(self, in_dim, out_dim, use_tanh=True):
         super().__init__()
 
         self.in_dim = in_dim
         self.out_dim = out_dim
         self.linear = nn.Linear(in_dim, out_dim)
-        # weight init happens in utils.py
+        self.use_tanh = use_tanh
 
     def forward(self, x):
         """This module computes out = tanh(Wx + b)
@@ -25,7 +25,7 @@ class ForwardLayer(nn.Module):
             _type_: must have shape (batch_size, out_dim)
         """
         h = self.linear(x)
-        return torch.tanh(h)
+        return torch.tanh(h) if self.use_tanh else h
 
 class InverseLayer(nn.Module):
     def __init__(self, in_dim, out_dim):

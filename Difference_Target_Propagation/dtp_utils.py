@@ -9,7 +9,7 @@ def initialize_layer(layer):
     if not isinstance(layer, nn.Linear):
         return
     
-    init.orthogonal_(layer.weight)
+    init.normal_(layer.weight, mean=0.0, std=0.01) # paper uses N(0, 0.01^2)
     layer.bias.data.zero_()
     
 def initialize_network(model):

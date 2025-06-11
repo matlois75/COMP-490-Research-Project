@@ -2,4 +2,5 @@
 .vscode
 data
 wandb
-checkpoints
+dtp_checkpoints
+bp_checkpoints

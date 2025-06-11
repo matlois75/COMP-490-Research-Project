@@ -31,8 +31,8 @@ class DTPNetwork(nn.Module):
         for i in range(0, len(hidden_dims)-1):
             self.f_layers.append(ForwardLayer(hidden_dims[i], hidden_dims[i+1]))
             self.g_layers.append(InverseLayer(hidden_dims[i], hidden_dims[i+1]))
-            
-        self.output_layer = nn.Linear(hidden_dims[-1], output_dim) # so here we separate the output layer from the tanh activated f_layers
+        self.f_layers.append(ForwardLayer(hidden_dims[-1], output_dim, use_tanh=False))
+        # self.g_layers.append(InverseLayer(hidden_dims[-1], output_dim)) # problematic line. might need to fix later, but excluding it yields good results so...
         
         initialize_network(self)
         
@@ -49,12 +49,11 @@ class DTPNetwork(nn.Module):
         h_list = []
         
         # h_0 will be assigned the output of feeding x into the first hidden layer, h_1 will be assigned the output of feeding h_0 into the second hidden layer, and so on.
-        for f_i in self.f_layers:
-            h_i = f_i(h_i)
+        for i in range(len(self.f_layers)-1):
+            h_i = self.f_layers[i](h_i)
             h_list.append(h_i)
         
-        # now, h_list = [h_1, h_2, ..., h_L], where each h_i has shape (batch_size, hidden_dims[i])
-        logits = self.output_layer(h_i) # shape (batch_size, output_dim)
+        logits = self.f_layers[-1](h_i)
         
         return logits, h_list
     
@@ -79,7 +78,7 @@ class DTPNetwork(nn.Module):
             retain_graph=True
         )[0] # produces gradient w.r.t. h_L
         
-        hL_target = h_L - (grad_h_L * self.eta_hat) # multiplying by eta_hat controls the learning rate for target computation in DTP
+        hL_target = h_L - (grad_h_L * self.eta_hat) # eta_hat is step size
 
         hhat_list = [hL_target]
 
@@ -89,7 +88,9 @@ class DTPNetwork(nn.Module):
             hhat_i_plus = hhat_list[0]
             g_i_plus = self.g_layers[-i+1]
             
-            hhat_list.insert(0, h_i + g_i_plus(hhat_i_plus) - g_i_plus(h_i_plus)) # see DTP paper (link in README) for formula details
+            with torch.no_grad():
+                delta = g_i_plus(hhat_i_plus.detach()) - g_i_plus(h_i_plus.detach())
+            hhat_list.insert(0, (h_i + delta).detach())
             
         # now we have hhat_list = [hhat_1, hhat_2, ..., hhat_L]
         
@@ -106,7 +107,7 @@ class DTPNetwork(nn.Module):
         Returns:
             tuple: Returns two scalars: total_forward_loss = sum of all ||f_i(h_{i-1}) - hhat_i||^2, and total_inverse_loss = sum of all ||g_i(f_i(h_{i-1} + epsilon)) - (h_{i-1} + epsilon)||^2.
         """
-        mse_loss = MSELoss(reduction='sum')
+        mse_loss = MSELoss(reduction='mean')
         total_forward_loss = torch.tensor(0.0, device=h_list[0].device)
         total_inverse_loss = torch.tensor(0.0, device=h_list[0].device)
         # could also store each layer's individual losses in Python lists to inspect them or weight them differently
@@ -128,7 +129,7 @@ class DTPNetwork(nn.Module):
         
         return (total_forward_loss, total_inverse_loss)
     
-    def step(self, x, labels, optimizer):
+    def step(self, x, labels, optimizers, update_forward=True):
         """_summary_
 
         Args:
@@ -136,18 +137,27 @@ class DTPNetwork(nn.Module):
             labels (tensor): ground truth class indices, tensor of shape (batch_size, 1)
             optimizer (_type_): an optimizer instance created outside like RMSProp
         """
-        optimizer.zero_grad()
+        g_opt = optimizers if not isinstance(optimizers, tuple) else optimizers[1]
         
+        # train g
+        g_opt.zero_grad()
+        logits, h_list = self.forward(x)
+        hhat_list, _ = self.compute_targets(h_list, labels, logits)
+        _, g_loss = self.layer_losses(h_list, hhat_list, x)
+        g_loss.backward()
+        g_opt.step()
+        
+        if not update_forward:
+            return 0.0, 0.0, g_loss.item(), 0
+        
+        # train f
+        f_opt = optimizers[0]
+        f_opt.zero_grad()
         logits, h_list = self.forward(x)
         hhat_list, loss_top = self.compute_targets(h_list, labels, logits)
-        loss_top.backward(retain_graph=True)        
-        
-        (f_loss, g_loss) = self.layer_losses(h_list, hhat_list, x)
-        g_loss.backward(retain_graph=True)
-        f_loss.backward(retain_graph=True)
-        
-        nn.utils.clip_grad_norm_(self.parameters(), 1.0) # prevents exploding gradients
-        optimizer.step()
+        f_loss, _ = self.layer_losses(h_list, hhat_list, x)
+        (loss_top + f_loss).backward()
+        f_opt.step()
         
         preds = logits.argmax(dim=1)
         correct = (preds == labels).sum().item()

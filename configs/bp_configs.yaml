@@ -1,0 +1,9 @@
+batch_size: 128
+epochs: 50
+bp_lr: 1e-3
+num_workers: 0
+
+out_dir: bp_checkpoints
+
+log_interval: 100
+checkpoint_interval: 10
