@@ -1,3 +1,11 @@
+mnist:
+  input_dim: 784
+  hidden_dims: [240, 240, 240, 240, 240, 240, 240]
+
+cifar10:
+  input_dim: 3072
+  hidden_dims: [1000, 1000, 1000]
+
 batch_size: 128
 epochs: 50
 bp_lr: 1e-3

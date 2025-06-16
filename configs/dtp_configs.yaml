@@ -1,6 +1,6 @@
 mnist:
   input_dim: 784
-  hidden_dims: [240, 240, 240, 240, 240, 240, 240]
+  hidden_dims: [500, 500, 500, 500]
 
 cifar10:
   input_dim: 3072
@@ -12,9 +12,10 @@ batch_size: 128
 epochs: 50
 forward_lr: 1e-3
 inverse_lr: 3e-3
+forward_lr_decay: 1e-4
 eta_hat: 0.05
 sigma: 0.4
-num_workers: 0
+num_workers: 8
 k_g_updates: 5
 
 out_dir: dtp_checkpoints
