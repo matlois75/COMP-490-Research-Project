@@ -4,3 +4,7 @@ data
 wandb
 dtp_checkpoints
 bp_checkpoints
+Difference_Target_Propagation/id_dtp_layers.py
+Difference_Target_Propagation/id_dtp_network.py
+train_id_dtp.py
+configs/id_dtp_configs.yaml
