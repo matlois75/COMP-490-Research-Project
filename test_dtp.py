@@ -1,6 +1,6 @@
 import torch, argparse, glob, os
 from torch.utils.data import DataLoader
-from torchvision.datasets import MNIST, CIFAR10
+from torchvision.datasets import MNIST, CIFAR10, CIFAR100
 from torchvision import transforms
 from Difference_Target_Propagation.dtp_network import DTPNetwork
 
@@ -17,7 +17,7 @@ def find_latest_checkpoint(checkpoint_dir="dtp_checkpoints", dataset=None):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument('--ckpt', type=str)
-    p.add_argument('--dataset', choices=['mnist', 'cifar10'])
+    p.add_argument('--dataset', choices=['mnist', 'cifar10', 'cifar100'])
     args = p.parse_args()
 
     if args.ckpt:
@@ -41,6 +41,9 @@ def main():
         test_ds = MNIST(root='data/', train=False, download=True, transform=transforms.ToTensor())
     elif args.dataset == 'cifar10':
         test_ds = CIFAR10(root='data/', train=False, download=True, transform=transforms.ToTensor())
+    elif args.dataset == 'cifar100':
+        test_ds = CIFAR100(root='data/', train=False, download=True, transform=transforms.ToTensor())
+        cfg["output_dim"] = 100
     
     test_ld = DataLoader(test_ds, batch_size=cfg['batch_size'], shuffle=False, num_workers=0)
 

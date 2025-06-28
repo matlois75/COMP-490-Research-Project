@@ -1,7 +1,7 @@
 import torch, os, os.path, wandb, argparse, yaml
 from torch.utils.data import DataLoader, random_split
 from torchvision import transforms
-from torchvision.datasets import MNIST, CIFAR10
+from torchvision.datasets import MNIST, CIFAR10, CIFAR100
 from Difference_Target_Propagation.dtp_network import DTPNetwork
 from datetime import datetime
 from tqdm import tqdm
@@ -38,7 +38,7 @@ def main():
     p.add_argument('--forward_lr', type=float)
     p.add_argument('--inverse_lr', type=float)
     p.add_argument('--num_workers', type=int)
-    p.add_argument('--dataset', choices=['mnist', 'cifar10'])
+    p.add_argument('--dataset', choices=['mnist', 'cifar10', 'cifar100'])
     args = p.parse_args()
 
     if args.epochs is not None:
@@ -68,7 +68,7 @@ def main():
 
     # meaningful run naming
     now = datetime.now()
-    base_name = f"dtp_{cfg['dataset']}_bs{cfg['batch_size']}_{now.day}_{now.strftime('%b').lower()}_{now.year}"
+    base_name = f"dtp_{cfg['dataset']}_{now.day}_{now.strftime('%b').lower()}_{now.year}"
     run_number = 1
     while True:
         run_name = f"{base_name}_{run_number}"
@@ -95,6 +95,12 @@ def main():
             root=data_dir, train=True, download=True,
             transform=transforms.ToTensor()
         )
+    elif cfg["dataset"] == 'cifar100':
+        train_dataset = CIFAR100(
+            root=data_dir, train=True, download=True,
+            transform=transforms.ToTensor()
+        )
+        cfg["output_dim"] = 100
         
     VAL_FRAC = 0.1 # 10 % hold-out
     train_size = int((1-VAL_FRAC) * len(train_dataset))

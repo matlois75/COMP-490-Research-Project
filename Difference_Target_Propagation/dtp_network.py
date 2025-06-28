@@ -32,7 +32,7 @@ class DTPNetwork(nn.Module):
             self.f_layers.append(ForwardLayer(hidden_dims[i], hidden_dims[i+1]))
             self.g_layers.append(InverseLayer(hidden_dims[i], hidden_dims[i+1]))
         self.f_layers.append(ForwardLayer(hidden_dims[-1], output_dim, use_tanh=False))
-        # self.g_layers.append(InverseLayer(hidden_dims[-1], output_dim)) # problematic line. might need to fix later, but excluding it yields good results so...
+        # self.g_layers.append(InverseLayer(hidden_dims[-1], output_dim)) # problematic line. excluding it yields good results so may not be needed
         
         initialize_network(self)
         
