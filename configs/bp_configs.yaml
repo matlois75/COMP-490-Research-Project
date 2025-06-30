@@ -1,15 +1,22 @@
 mnist:
   input_dim: 784
-  hidden_dims: [240, 240, 240, 240, 240, 240, 240]
+  hidden_dims: [1000, 1000, 1000]
 
 cifar10:
   input_dim: 3072
   hidden_dims: [1000, 1000, 1000]
 
+cifar100:
+  input_dim: 3072
+  hidden_dims: [1000, 1000, 1000]
+
+dataset: mnist
+output_dim: 10
+
 batch_size: 128
 epochs: 50
 bp_lr: 1e-3
-num_workers: 0
+num_workers: 8
 
 out_dir: bp_checkpoints
 

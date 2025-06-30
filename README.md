@@ -117,7 +117,7 @@ This implementation is based on the 2015 paper by Lee et al.
 
 | Aspect                       | This repo                                                                          | Original paper                               |
 | :--------------------------- | :--------------------------------------------------------------------------------- | :------------------------------------------- |
-| **Weight init**              | `N(0, 0.01²)` for every `nn.Linear`.                                               | Orthogonal matrices.                         |
+| **Weight init**              | `N(0, 0.01²)` for every `nn.Linear`. (Orthogonal yielded poor results)             | Orthogonal matrices.                         |
 | **Optimizer**                | Separate RMSprop for forward and inverse params, with CosineAnnealing LR schedule. | RMSprop with layer-specific static LR.       |
 | **Inverse for output layer** | Not used (no `g_L`).                                                               | Present but sometimes omitted in later work. |
 | **Noise schedule**           | Fixed σ from config.                                                               | σ decays over epochs (Eq. 27 discussion).    |

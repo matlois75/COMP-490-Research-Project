@@ -167,7 +167,7 @@ def main():
         epoch_total_samples = 0
 
         for batch_idx, (x, y) in enumerate(tqdm(train_loader, desc=f"Epoch {epoch}/{cfg['epochs']}")):
-            x = x = torch.flatten(x, start_dim=1).to(device)
+            x = torch.flatten(x, start_dim=1).to(device)
             y = y.to(device)
             
             # feedback‑only warm‑up + K inverse updates per batch
@@ -184,11 +184,11 @@ def main():
             
             if batch_idx % cfg["log_interval"] == 0:
                 wandb.log({
-                    "dtp_loss_top_batch": dtp_loss_top_val,
-                    "dtp_f_loss_batch": dtp_f_loss_val,
-                    "dtp_g_loss_batch": dtp_g_loss_val,
-                    "dtp_train_batch_correct_count": dtp_batch_correct,
-                    "dtp_train_batch_acc": dtp_batch_correct / x.size(0),
+                    "loss_top_batch": dtp_loss_top_val,
+                    "f_loss_batch": dtp_f_loss_val,
+                    "g_loss_batch": dtp_g_loss_val,
+                    "train_batch_correct_count": dtp_batch_correct,
+                    "train_batch_acc": dtp_batch_correct / x.size(0),
                 })
                 
         epoch_dtp_loss_top /= len(train_loader)
@@ -205,19 +205,19 @@ def main():
             print(f"  ValLoss={metrics['val_loss']:.4g}  ValAcc={100*metrics['val_acc']:.2f}%")
             wandb.log({
                 "epoch": epoch,
-                "dtp_epoch_loss_top": epoch_dtp_loss_top,
-                "dtp_epoch_f_loss":   epoch_dtp_f_loss,
-                "dtp_epoch_g_loss":   epoch_dtp_g_loss,
-                "dtp_train_epoch_acc": epoch_dtp_acc,
+                "epoch_loss_top": epoch_dtp_loss_top,
+                "epoch_f_loss":   epoch_dtp_f_loss,
+                "epoch_g_loss":   epoch_dtp_g_loss,
+                "train_epoch_acc": epoch_dtp_acc,
                 **metrics
             })
         else:
             wandb.log({
                 "epoch": epoch,
-                "dtp_epoch_loss_top": epoch_dtp_loss_top,
-                "dtp_epoch_f_loss":   epoch_dtp_f_loss,
-                "dtp_epoch_g_loss":   epoch_dtp_g_loss,
-                "dtp_train_epoch_acc": epoch_dtp_acc,
+                "epoch_loss_top": epoch_dtp_loss_top,
+                "epoch_f_loss":   epoch_dtp_f_loss,
+                "epoch_g_loss":   epoch_dtp_g_loss,
+                "train_epoch_acc": epoch_dtp_acc,
             })
         
         # save checkpoint every N epochs or on the last epoch

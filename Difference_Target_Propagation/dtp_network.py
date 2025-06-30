@@ -82,7 +82,7 @@ class DTPNetwork(nn.Module):
 
         hhat_list = [hL_target]
 
-        for i in range(2, len(self.hidden_dims)+1):
+        for i in range(2, len(self.hidden_dims)+1): # TODO: look at/fix equation
             h_i = h_list[-i]
             h_i_plus = h_list[-i+1]
             hhat_i_plus = hhat_list[0]
