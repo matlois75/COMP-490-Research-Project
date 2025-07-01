@@ -38,6 +38,7 @@ def main():
     p.add_argument('--forward_lr', type=float)
     p.add_argument('--inverse_lr', type=float)
     p.add_argument('--num_workers', type=int)
+    p.add_argument('--use_l_drl', type=lambda x: x.lower() == 'true')
     p.add_argument('--dataset', choices=['mnist', 'cifar10', 'cifar100'])
     args = p.parse_args()
 
@@ -53,6 +54,8 @@ def main():
         cfg["num_workers"] = args.num_workers
     if args.dataset is not None:
         cfg["dataset"] = args.dataset
+    if args.use_l_drl is not None:
+        cfg["use_l_drl"] = args.use_l_drl
 
     seed = 42
 
@@ -136,6 +139,7 @@ def main():
         output_dim=cfg["output_dim"],
         eta_hat=cfg["eta_hat"],
         sigma=cfg["sigma"],
+        use_l_drl=cfg["use_l_drl"]
     )
     dtp_model.to(device)
     wandb.watch(dtp_model, log="all", log_freq=cfg["log_interval"], log_graph=True, criterion=None)

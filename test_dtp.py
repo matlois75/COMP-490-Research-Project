@@ -52,7 +52,8 @@ def main():
         tuple(cfg[args.dataset]['hidden_dims']),
         cfg['output_dim'],
         cfg['eta_hat'],
-        cfg['sigma']
+        cfg['sigma'],
+        cfg.get('use_l_drl', True)
     )
     model.load_state_dict(checkpoint['model_state_dict'])
     model.to(device).eval()

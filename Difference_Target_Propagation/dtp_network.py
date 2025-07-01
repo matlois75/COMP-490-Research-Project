@@ -13,7 +13,8 @@ class DTPNetwork(nn.Module):
             hidden_dims: tuple,
             output_dim: int,
             eta_hat: float,
-            sigma: float
+            sigma: float,
+            use_l_drl: bool,
             ):
         super().__init__()
         
@@ -22,6 +23,7 @@ class DTPNetwork(nn.Module):
         self.output_dim = output_dim
         self.eta_hat = eta_hat
         self.sigma = sigma
+        self.use_l_drl = use_l_drl
         
         self.f_layers = nn.ModuleList()
         self.g_layers = nn.ModuleList()
@@ -121,11 +123,24 @@ class DTPNetwork(nn.Module):
             tilde_h_i = forward_i(h_prev)
             total_forward_loss += mse_loss(tilde_h_i, hhat_i)
             
-            noisy = add_gaussian_noise(h_prev, self.sigma) # sigma determines the standard deviation of the Gaussian noise that gets added to h_prev
-            f_noisy = forward_i(noisy)
-            g_recon = inverse_i(f_noisy)
-            total_inverse_loss += mse_loss(g_recon, noisy)
-        # now summed up one forward and one inverse loss for each hidden layer. total losses are ready
+            if not self.use_l_drl:
+                noisy = add_gaussian_noise(h_prev, self.sigma) # sigma determines the standard deviation of the Gaussian noise that gets added to h_prev
+                f_noisy = forward_i(noisy)
+                g_recon = inverse_i(f_noisy)
+                total_inverse_loss += mse_loss(g_recon, noisy)
+                # now summed up one forward and one inverse loss for each hidden layer. total losses are ready
+            else:
+                # Local-Difference Reconstruction Loss
+                eps = torch.randn_like(h_prev) * self.sigma # noise on h_i
+                eta = torch.randn_like(tilde_h_i) * self.sigma # noise on h_{i+1}
+            
+                # directional term – aligns Jacobians
+                dir_part = -(eps * (inverse_i(forward_i(h_prev + eps.detach())) - h_prev)).sum(dim=1).mean()
+            
+                # reconstruction term – keeps inverse accurate
+                rec_part = 0.5 * (inverse_i(tilde_h_i + eta.detach()) - h_prev).pow(2).mean()
+            
+                total_inverse_loss += dir_part + rec_part
         
         return (total_forward_loss, total_inverse_loss)
     

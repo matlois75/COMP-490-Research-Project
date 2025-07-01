@@ -18,9 +18,10 @@ forward_lr: 1e-3
 inverse_lr: 2e-3
 forward_lr_decay: 1e-4
 eta_hat: 0.05
-sigma: 0.4
+sigma: 0.08
 num_workers: 8
-k_g_updates: 5
+k_g_updates: 10
+use_l_drl: true
 
 out_dir: dtp_checkpoints
 
